@@ -1,13 +1,53 @@
 /*
-Ignis
-Script by CrazyLi825
-Version: 1.0 (1/9/2023)
+	Version 1.0
+	Made by MarkyJoe1990 (edited Karelmx)
 
-This basically recreates the Ignis (華炎) skill from Awakening & Fates.
-Upon activation, when attacking when a physical weapon, half the user's Mag gets added to the damage
-and when attacking with a magical weapon, half the user's Str gets added to the damage.
+        This script is a modified version of one created by MarkyJoe1990 LoneWolf, and he gave me permission to share it.
+	This script adds a new custom skill that gives the owner
+	bonuses to their attack, hit, avoid, critical, critical avoid,
+	defense and resistance, but but for every ally nearby them.
+        This is different from my other modification, Bonds Booster increases statistics if there are any allies nearby,
+        in this case the increase will be multiplied by the number of allies that are within range
+	
+	How to use:
+	- Create a skill with the "custom" radio checked
+	- Set the keyword to "BondsOwl"
+	- Click custom parameters and set the scope and what bonuses
+		you get (more on that in a moment)
+	- Done
+	
+	Custom Parameters:
+	The skill has the following custom parameters.
+	
+	scope (required)
+	Determines how many tiles away all allies need to be
+	for the skill to not activate
+	
+	power (optional)
+	Your unit's power. Displays on the stat screen.
+	
+	hit (optional)
+	Your unit's hit rate. Displays on the stat screen.
+	
+	avoid (optional)
+	Your unit's avoid rate. Displays on the stat screen.
+	
+	critical (optional)
+	Your unit's crit rate. Displays on the stat screen.
+	
+	criticalAvoid (optional)
+	Your unit's critical avoidance rate. Does NOT display on the stat screen
+	unless you have a plugin that enables it.
+	
+	defense (optional)
+	Your unit's physical defense. Does NOT display on the stat screen.
+	
+	resistance (optional)
+	Your unit's magical defense. Does NOT display on the stat screen.
 
-To use, create a skill with Custom type and set the keyword to "Ignis".
+  Example:
+ (scope: 2, power: 1, defense: 1) In this way it grants power and defense +1 for each ally within a range of 2 spaces.
+ Values ​​can also be negative.
 */
 
 (function() {
