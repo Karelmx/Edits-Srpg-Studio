@@ -1,0 +1,273 @@
+/*
+	Version 1.0
+	Made by MarkyJoe1990 (edited Karelmx)
+
+        This script is a modified version of one created by MarkyJoe1990 LoneWolf, and he gave me permission to share it.
+	This script adds a new custom skill that gives the owner
+	bonuses to their attack, hit, avoid, critical, critical avoid,
+	defense and resistance, but for every ally nearby them.
+        This is different from my other modification, Bonds Booster increases statistics if there are any allies nearby,
+        in this case the increase will be multiplied by the number of allies that are within range
+	
+	How to use:
+	- Create a skill with the "custom" radio checked
+	- Set the keyword to "BondsOwl"
+	- Click custom parameters and set the scope and what bonuses
+		you get (more on that in a moment)
+	- Done
+	
+	Custom Parameters:
+	The skill has the following custom parameters.
+	
+	scope (required)
+	Determines how many tiles away all allies need to be
+	for the skill to not activate
+	
+	power (optional)
+	Your unit's power. Displays on the stat screen.
+	
+	hit (optional)
+	Your unit's hit rate. Displays on the stat screen.
+	
+	avoid (optional)
+	Your unit's avoid rate. Displays on the stat screen.
+	
+	critical (optional)
+	Your unit's crit rate. Displays on the stat screen.
+	
+	criticalAvoid (optional)
+	Your unit's critical avoidance rate. Does NOT display on the stat screen
+	unless you have a plugin that enables it.
+	
+	defense (optional)
+	Your unit's physical defense. Does NOT display on the stat screen.
+	
+	resistance (optional)
+	Your unit's magical defense. Does NOT display on the stat screen.
+
+  Example:
+ (scope: 2, power: 1, defense: 1) In this way it grants power and defense +1 for each ally within a range of 2 spaces.
+ Values ​​can also be negative.
+*/
+
+(function() {
+	var scopeError = function(skill) {
+		root.msg("Check the custom parameter \"scope\" for skill: '" + skill.getName() + "'");
+		root.endGame();
+	}
+	
+	var alliesInRange = function(unit, scope) {
+		var unitX = unit.getMapX();
+		var unitY = unit.getMapY();
+		var i, distanceX, distanceY, totalDistance;
+		var amount = 0;
+
+		var allyList = [];
+		if (unit.getUnitType() == UnitType.ENEMY) {
+			allyList.push(EnemyList.getAliveList());
+		} else {
+			allyList.push(PlayerList.getSortieList());
+			allyList.push(root.getCurrentSession().getGuestList());
+			allyList.push(AllyList.getAliveList());
+		}
+
+		for (i = 0; i < allyList.length; i++) {
+			for (var x = 0; x < allyList[i].getCount(); x++) {
+				var targetUnit = allyList[i].getData(x);
+				distanceX = Math.abs(unitX - targetUnit.getMapX());
+				distanceY = Math.abs(unitY - targetUnit.getMapY());
+				totalDistance = distanceX + distanceY;
+				if (totalDistance > 0 && totalDistance <= scope) {
+					amount++;
+				}
+			}
+		}
+
+		// Devuelve la cantidad de aliados en el rango
+		return amount;
+	}
+
+	var alias1 = AbilityCalculator.getPower;
+	AbilityCalculator.getPower = function(unit, weapon) {
+		var i, scope, amount, bonus, currentSkill;
+		var pow = alias1.call(this, unit, weapon);
+		var skillArray = SkillControl.getDirectSkillArray(unit, SkillType.CUSTOM, "BondsOwl");
+		
+		if (root.getCurrentScene() != SceneType.REST) {
+			for (i = 0; i < skillArray.length && skillArray.length > 0; i++) {
+				currentSkill = skillArray[i].skill;
+				if (currentSkill.custom.scope === undefined) {
+					scopeError(currentSkill);
+				}
+				scope = currentSkill.custom.scope;
+				amount = alliesInRange(unit, scope);
+				bonus = currentSkill.custom.power === undefined ? 0 : currentSkill.custom.power;
+				// Multiplica el bonificador por la cantidad de aliados
+				pow += bonus * amount;
+			}
+		}
+
+		return pow;
+	}
+
+
+    // Resto del código...
+
+    // Puedes aplicar un enfoque similar para los demás cálculos (hit, avoid, etc.)
+
+    // Resto del código...
+
+var alias2 = AbilityCalculator.getHit;
+AbilityCalculator.getHit = function(unit, weapon) {
+    var i, scope, amount, bonus, currentSkill;
+    var hit = alias2.call(this, unit, weapon);
+    var skillArray = SkillControl.getDirectSkillArray(unit, SkillType.CUSTOM, "BondsOwl");
+
+    if (root.getCurrentScene() !== SceneType.REST) {
+        for (i = 0; i < skillArray.length && skillArray.length > 0; i++) {
+            currentSkill = skillArray[i].skill;
+            if (currentSkill.custom.scope === undefined) {
+                scopeError(currentSkill);
+            }
+            scope = currentSkill.custom.scope;
+            amount = alliesInRange(unit, scope);
+            bonus = currentSkill.custom.hit === undefined ? 0 : currentSkill.custom.hit;
+            // Multiplica el bonificador por la cantidad de aliados
+            hit += bonus * amount;
+        }
+    }
+
+    return hit;
+}
+
+// Resto del código...
+
+var alias3 = AbilityCalculator.getAvoid;
+AbilityCalculator.getAvoid = function(unit, weapon) {
+    var i, scope, amount, bonus, currentSkill;
+    var avo = alias3.call(this, unit, weapon);
+    var skillArray = SkillControl.getDirectSkillArray(unit, SkillType.CUSTOM, "BondsOwl");
+
+    if (root.getCurrentScene() !== SceneType.REST) {
+        for (i = 0; i < skillArray.length && skillArray.length > 0; i++) {
+            currentSkill = skillArray[i].skill;
+            if (currentSkill.custom.scope === undefined) {
+                scopeError(currentSkill);
+            }
+            scope = currentSkill.custom.scope;
+            amount = alliesInRange(unit, scope);
+            bonus = currentSkill.custom.avoid === undefined ? 0 : currentSkill.custom.avoid;
+            // Multiplica el bonificador por la cantidad de aliados
+            avo += bonus * amount;
+        }
+    }
+
+    return avo;
+}
+
+// Resto del código...
+
+	
+	var alias4 = AbilityCalculator.getCritical;
+    AbilityCalculator.getCritical = function(unit, weapon) {
+    var i, scope, amount, bonus, currentSkill;
+    var crit = alias4.call(this, unit, weapon);
+    var skillArray = SkillControl.getDirectSkillArray(unit, SkillType.CUSTOM, "BondsOwl");
+
+    if (root.getCurrentScene() !== SceneType.REST) {
+        for (i = 0; i < skillArray.length && skillArray.length > 0; i++) {
+            currentSkill = skillArray[i].skill;
+            if (currentSkill.custom.scope === undefined) {
+                scopeError(currentSkill);
+            }
+            scope = currentSkill.custom.scope;
+            amount = alliesInRange(unit, scope);
+            bonus = currentSkill.custom.critical === undefined ? 0 : currentSkill.custom.critical;
+            // Multiplica el bonificador por la cantidad de aliados
+            crit += bonus * amount;
+        }
+    }
+
+    return crit;
+}
+	
+var alias5 = AbilityCalculator.getCriticalAvoid;
+    AbilityCalculator.getCriticalAvoid = function(unit, weapon) {
+    var i, scope, amount, bonus, currentSkill;
+    var cavo = alias5.call(this, unit, weapon);
+    var skillArray = SkillControl.getDirectSkillArray(unit, SkillType.CUSTOM, "BondsOwl");
+
+    if (root.getCurrentScene() !== SceneType.REST) {
+        for (i = 0; i < skillArray.length && skillArray.length > 0; i++) {
+            currentSkill = skillArray[i].skill;
+            if (currentSkill.custom.scope === undefined) {
+                scopeError(currentSkill);
+            }
+            scope = currentSkill.custom.scope;
+            amount = alliesInRange(unit, scope);
+            bonus = currentSkill.custom.criticalAvoid === undefined ? 0 : currentSkill.custom.criticalAvoid;
+            // Multiplica el bonificador por la cantidad de aliados
+            cavo += bonus * amount;
+        }
+    }
+
+    return cavo;
+}
+	
+var alias6 = AbilityCalculator.getAgility;
+    AbilityCalculator.getAgility = function(unit, weapon) {
+    var i, scope, amount, bonus, currentSkill;
+    var agi = alias6.call(this, unit, weapon);
+    var skillArray = SkillControl.getDirectSkillArray(unit, SkillType.CUSTOM, "BondsOwl");
+
+    if (root.getCurrentScene() !== SceneType.REST) {
+        for (i = 0; i < skillArray.length && skillArray.length > 0; i++) {
+            currentSkill = skillArray[i].skill;
+            if (currentSkill.custom.scope === undefined) {
+                scopeError(currentSkill);
+            }
+            scope = currentSkill.custom.scope;
+            amount = alliesInRange(unit, scope);
+            bonus = currentSkill.custom.agility === undefined ? 0 : currentSkill.custom.agility;
+            // Multiplica el bonificador por la cantidad de aliados
+            agi += bonus * amount;
+        }
+    }
+
+    return agi;
+}
+	
+	//For defense resistance
+	var alias7 = DamageCalculator.calculateDefense;
+    DamageCalculator.calculateDefense = function(active, passive, weapon, isCritical, totalStatus, trueHitValue) {
+    var i, scope, amount, bonus, currentSkill;
+    var def = alias7.call(this, active, passive, weapon, isCritical, totalStatus, trueHitValue);
+    var skillArray = SkillControl.getDirectSkillArray(passive, SkillType.CUSTOM, "BondsOwl");
+
+    if (root.getCurrentScene() !== SceneType.REST) {
+        for (i = 0; i < skillArray.length && skillArray.length > 0; i++) {
+            currentSkill = skillArray[i].skill;
+            if (currentSkill.custom.scope === undefined) {
+                scopeError(currentSkill);
+            }
+            scope = currentSkill.custom.scope;
+            amount = alliesInRange(passive, scope);
+
+            if (Miscellaneous.isPhysicsBattle(weapon)) {
+                bonus = currentSkill.custom.defense === undefined ? 0 : currentSkill.custom.defense;
+            } else {
+                bonus = currentSkill.custom.resistance === undefined ? 0 : currentSkill.custom.resistance;
+            }
+
+            // Multiplicar el bono por el número de aliados en rango
+            if (amount >= 1) {
+                bonus *= amount;
+                def += bonus;
+            }
+        }
+    }
+
+    return def;
+}
+
+}) ();
