@@ -46,8 +46,8 @@ Can be positive, negative, or 0.
 
 Examples:
 damage/defenseBonus: 3
-damage/Bonus: -2
-damage/Bonus: 0
+damage/defenseBonus: -2
+damage/defenseBonus: 0
 
 Optional Parameters:
 damageBonus and defenseBonus are optional.
