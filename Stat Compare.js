@@ -35,6 +35,8 @@ Supported stats:
 "mdf" = Magic Defense
 "mov" = Movement
 "wlv" = Weapon Level
+"mhp" = Max HP
+"lvl" = Level
 
 Supported values:
 "greater"
@@ -43,11 +45,6 @@ Supported values:
 damageBonus/defenseBonus
 Bonus damage dealt if the condition is met.
 Can be positive, negative, or 0.
-
-Examples:
-damage/defenseBonus: 3
-damage/defenseBonus: -2
-damage/defenseBonus: 0
 
 Optional Parameters:
 damageBonus and defenseBonus are optional.
@@ -200,6 +197,12 @@ If omitted, they automatically default to 0.
 
             case "wlv":
                 return RealBonus.getWlv(unit);
+
+		    case "mhp":
+                return RealBonus.getMhp(unit);
+
+			case "lvl":
+                return unit.getLv();
         }
 
         return 0;
