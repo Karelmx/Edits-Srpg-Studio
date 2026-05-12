@@ -10,8 +10,9 @@ How to Use:
 2. Set the skill keyword to: matattack
 3. Add the following Custom Parameters to the skill:
 {
-stat: "spd",
-multiplier: 0.4
+stat: "hp",
+multiplier: 0.5,
+target: "target"
 }
 
 Parameter Explanation:
@@ -28,32 +29,17 @@ Supported stats:
 "mdf" = Magic Defense
 "mov" = Movement
 "wlv" = Weapon Level
+"mhp" = Max HP
+"hp"  = Current HP
+"losthp" = Missing HP
 
 multiplier
 Determines how much of the selected stat is added as bonus damage.
 
-Examples:
+Available targets:
+user   = Uses the skill user's stats (default)
+target = Uses the target's stats
 
-{
-stat: "spd",
-multiplier: 0.4
-}
-
-Adds 40% of the unit's Speed as bonus damage.
-
-{
-stat: "def",
-multiplier: 1.5
-}
-
-Adds 150% of the unit's Defense as bonus damage.
-
-{
-stat: "lck",
-multiplier: 2.8
-}
-
-Adds 280% of the unit's Luck as bonus damage.
 */
 
 (function () {
@@ -103,9 +89,21 @@ Adds 280% of the unit's Luck as bonus damage.
 
             var stat = skill.custom.stat;
             var multiplier = skill.custom.multiplier;
+            var target = skill.custom.target;
 
+            // default values
             if (multiplier == null) {
                 multiplier = 1;
+            }
+
+            // =========================
+            // USER OR TARGET
+            // =========================
+
+            var unit = active;
+
+            if (target === "target") {
+                unit = passive;
             }
 
             var statValue = 0;
@@ -117,39 +115,51 @@ Adds 280% of the unit's Luck as bonus damage.
             switch (stat) {
 
                 case "str":
-                    statValue = RealBonus.getStr(active);
+                    statValue = RealBonus.getStr(unit);
                     break;
 
                 case "mag":
-                    statValue = RealBonus.getMag(active);
+                    statValue = RealBonus.getMag(unit);
                     break;
 
                 case "skl":
-                    statValue = RealBonus.getSki(active);
+                    statValue = RealBonus.getSki(unit);
                     break;
 
                 case "spd":
-                    statValue = RealBonus.getSpd(active);
+                    statValue = RealBonus.getSpd(unit);
                     break;
 
                 case "lck":
-                    statValue = RealBonus.getLuk(active);
+                    statValue = RealBonus.getLuk(unit);
                     break;
 
                 case "def":
-                    statValue = RealBonus.getDef(active);
+                    statValue = RealBonus.getDef(unit);
                     break;
 
                 case "mdf":
-                    statValue = RealBonus.getMdf(active);
+                    statValue = RealBonus.getMdf(unit);
                     break;
 
                 case "mov":
-                    statValue = RealBonus.getMov(active);
+                    statValue = RealBonus.getMov(unit);
                     break;
 
                 case "wlv":
-                    statValue = RealBonus.getWlv(active);
+                    statValue = RealBonus.getWlv(unit);
+                    break;
+
+                case "mhp":
+                    statValue = ParamBonus.getMhp(unit);
+                    break;
+
+                case "hp":
+                    statValue = unit.getHp();
+                    break;
+
+                case "losthp":
+                    statValue = ParamBonus.getMhp(unit) - unit.getHp();
                     break;
             }
 
