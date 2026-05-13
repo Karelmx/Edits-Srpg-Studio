@@ -3,7 +3,8 @@ Stat Compare Skill Plugin
 Created by Karelmx
 
 This plugin allows you to create passive skills that compare one of the user's stats with one of the target's stats.
-If the condition is met, the skill can increase damage dealt and/or increase defense when receiving attacks.
+If the condition is met, the skill can increase damage dealt and/or or increase more stats.
+Stats bonus can be positive, negative, or 0.
 
 How to Use:
 1. Create a Custom Skill.
@@ -12,18 +13,17 @@ How to Use:
 
 Basic Example:
 {
-userStat: "str",
-targetStat: "str",
+userStat: "bld",
+targetStat: "lvl",
 operator: "greater",
-value: 5,
-damageBonus: 3,
-defenseBonus: 3
+value: 3,
+damageBonus: 10,
+defenseBonus: 10,
+hitBonus: 30,
+avoidBonus: 30,
+criticalBonus: 30,
+criticalAvoidBonus: 30
 }
-
-What This Example Does:
-If the user's STR is 5 or more higher than the target's STR:
-* The user deals +3 damage.
-* The user gains +3 DEF/MDF when defending.
 
 Supported stats:
 "str" = Strength
@@ -43,13 +43,8 @@ Supported values:
 "greater"
 "less"
 
-damageBonus/defenseBonus
-Bonus damage dealt if the condition is met.
-Can be positive, negative, or 0.
-
 Optional Parameters:
-damageBonus and defenseBonus are optional.
-If omitted, they automatically default to 0.
+If any parameter is omitted, they automatically default to 0.
 */
 
 (function () {
