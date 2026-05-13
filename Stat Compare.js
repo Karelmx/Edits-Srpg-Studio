@@ -37,6 +37,7 @@ Supported stats:
 "wlv" = Weapon Level
 "mhp" = Max HP
 "lvl" = Level
+"bld" = Build/Constitution
 
 Supported values:
 "greater"
@@ -57,49 +58,64 @@ If omitted, they automatically default to 0.
     // DAMAGE BONUS
     // =========================
 
-    var aliasDamage = AttackEvaluator.HitCritical.calculateDamage;
 
-    AttackEvaluator.HitCritical.calculateDamage = function (virtualActive, virtualPassive, attackEntry) {
+    var aliasDamage = DamageCalculator.calculateDamage;
 
-        var damage = aliasDamage.call(this, virtualActive, virtualPassive, attackEntry);
+        DamageCalculator.calculateDamage = function (
+        active,
+        passive,
+        weapon,
+        isCritical,
+        activeTotalStatus,
+        passiveTotalStatus,
+        trueHitValue
+    ) {
 
-        var active = virtualActive.unitSelf;
-        var passive = virtualPassive.unitSelf;
+    var damage = aliasDamage.call(
+        this,
+        active,
+        passive,
+        weapon,
+        isCritical,
+        activeTotalStatus,
+        passiveTotalStatus,
+        trueHitValue
+    );
 
-        var skill = SkillControl.getPossessionCustomSkill(
-            active,
-            "statcompare"
-        );
+    var skill = SkillControl.getPossessionCustomSkill(
+        active,
+        "statcompare"
+    );
 
-        if (skill !== null) {
+    if (skill !== null) {
 
-            var userStat = skill.custom.userStat;
-            var targetStat = skill.custom.targetStat;
+        var userStat = skill.custom.userStat;
+        var targetStat = skill.custom.targetStat;
 
-            var operator = skill.custom.operator;
-            var value = skill.custom.value;
+        var operator = skill.custom.operator;
+        var value = skill.custom.value;
 
-            var damageBonus = skill.custom.damageBonus || 0;
+        var damageBonus = skill.custom.damageBonus || 0;
 
-            var userValue = getStat(active, userStat);
-            var targetValue = getStat(passive, targetStat);
+        var userValue = getStat(active, userStat);
+        var targetValue = getStat(passive, targetStat);
 
-            var condition = false;
+        var condition = false;
 
-            if (operator === "greater") {
-                condition = (userValue >= targetValue + value);
-            }
-            else if (operator === "less") {
-                condition = (userValue <= targetValue - value);
-            }
-
-            if (condition) {
-                damage += damageBonus;
-            }
+        if (operator === "greater") {
+            condition = (userValue >= targetValue + value);
+        }
+        else if (operator === "less") {
+            condition = (userValue <= targetValue - value);
         }
 
-        return damage;
-    };
+        if (condition) {
+            damage += damageBonus;
+        }
+    }
+
+    return damage;
+};
 
 
     // =========================
@@ -203,6 +219,9 @@ If omitted, they automatically default to 0.
 
 			case "lvl":
                 return unit.getLv();
+
+			case "bld":
+                return RealBonus.getBld(unit);
         }
 
         return 0;
