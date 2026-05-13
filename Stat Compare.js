@@ -58,10 +58,9 @@ If omitted, they automatically default to 0.
     // DAMAGE BONUS
     // =========================
 
-
     var aliasDamage = DamageCalculator.calculateDamage;
 
-        DamageCalculator.calculateDamage = function (
+    DamageCalculator.calculateDamage = function (
         active,
         passive,
         weapon,
@@ -71,51 +70,29 @@ If omitted, they automatically default to 0.
         trueHitValue
     ) {
 
-    var damage = aliasDamage.call(
-        this,
-        active,
-        passive,
-        weapon,
-        isCritical,
-        activeTotalStatus,
-        passiveTotalStatus,
-        trueHitValue
-    );
+        var damage = aliasDamage.call(
+            this,
+            active,
+            passive,
+            weapon,
+            isCritical,
+            activeTotalStatus,
+            passiveTotalStatus,
+            trueHitValue
+        );
 
-    var skill = SkillControl.getPossessionCustomSkill(
-        active,
-        "statcompare"
-    );
+        var skill = SkillControl.getPossessionCustomSkill(
+            active,
+            "statcompare"
+        );
 
-    if (skill !== null) {
+        if (skill !== null && checkCondition(active, passive, skill)) {
 
-        var userStat = skill.custom.userStat;
-        var targetStat = skill.custom.targetStat;
-
-        var operator = skill.custom.operator;
-        var value = skill.custom.value;
-
-        var damageBonus = skill.custom.damageBonus || 0;
-
-        var userValue = getStat(active, userStat);
-        var targetValue = getStat(passive, targetStat);
-
-        var condition = false;
-
-        if (operator === "greater") {
-            condition = (userValue >= targetValue + value);
-        }
-        else if (operator === "less") {
-            condition = (userValue <= targetValue - value);
+            damage += skill.custom.damageBonus || 0;
         }
 
-        if (condition) {
-            damage += damageBonus;
-        }
-    }
-
-    return damage;
-};
+        return damage;
+    };
 
 
     // =========================
@@ -148,35 +125,183 @@ If omitted, they automatically default to 0.
             "statcompare"
         );
 
-        if (skill !== null) {
+        if (skill !== null && checkCondition(passive, active, skill)) {
 
-            var userStat = skill.custom.userStat;
-            var targetStat = skill.custom.targetStat;
-
-            var operator = skill.custom.operator;
-            var value = skill.custom.value;
-
-            var defenseBonus = skill.custom.defenseBonus || 0;
-
-            var userValue = getStat(passive, userStat);
-            var targetValue = getStat(active, targetStat);
-
-            var condition = false;
-
-            if (operator === "greater") {
-                condition = (userValue >= targetValue + value);
-            }
-            else if (operator === "less") {
-                condition = (userValue <= targetValue - value);
-            }
-
-            if (condition) {
-                def += defenseBonus;
-            }
+            def += skill.custom.defenseBonus || 0;
         }
 
         return def;
     };
+
+
+    // =========================
+    // HIT BONUS
+    // =========================
+
+    var aliasHit = HitCalculator.calculateHit;
+
+    HitCalculator.calculateHit = function (
+        active,
+        passive,
+        weapon,
+        activeTotalStatus,
+        passiveTotalStatus
+    ) {
+
+        var hit = aliasHit.call(
+            this,
+            active,
+            passive,
+            weapon,
+            activeTotalStatus,
+            passiveTotalStatus
+        );
+
+        var skill = SkillControl.getPossessionCustomSkill(
+            active,
+            "statcompare"
+        );
+
+        if (skill !== null && checkCondition(active, passive, skill)) {
+
+            hit += skill.custom.hitBonus || 0;
+        }
+
+        return hit;
+    };
+
+
+    // =========================
+    // AVOID BONUS
+    // =========================
+
+    var aliasAvoid = HitCalculator.calculateAvoid;
+
+    HitCalculator.calculateAvoid = function (
+        active,
+        passive,
+        weapon,
+        totalStatus
+    ) {
+
+        var avo = aliasAvoid.call(
+            this,
+            active,
+            passive,
+            weapon,
+            totalStatus
+        );
+
+        var skill = SkillControl.getPossessionCustomSkill(
+            passive,
+            "statcompare"
+        );
+
+        if (skill !== null && checkCondition(passive, active, skill)) {
+
+            avo += skill.custom.avoidBonus || 0;
+        }
+
+        return avo;
+    };
+
+
+    // =========================
+    // CRITICAL BONUS
+    // =========================
+
+    var aliasCrit = CriticalCalculator.calculateCritical;
+
+    CriticalCalculator.calculateCritical = function (
+        active,
+        passive,
+        weapon,
+        activeTotalStatus,
+        passiveTotalStatus
+    ) {
+
+        var crt = aliasCrit.call(
+            this,
+            active,
+            passive,
+            weapon,
+            activeTotalStatus,
+            passiveTotalStatus
+        );
+
+        var skill = SkillControl.getPossessionCustomSkill(
+            active,
+            "statcompare"
+        );
+
+        if (skill !== null && checkCondition(active, passive, skill)) {
+
+            crt += skill.custom.criticalBonus || 0;
+        }
+
+        return crt;
+    };
+
+
+    // =========================
+    // CRITICAL AVOID BONUS
+    // =========================
+
+    var aliasCritAvoid = CriticalCalculator.calculateCriticalAvoid;
+
+    CriticalCalculator.calculateCriticalAvoid = function (
+        active,
+        passive,
+        weapon,
+        totalStatus
+    ) {
+
+        var cav = aliasCritAvoid.call(
+            this,
+            active,
+            passive,
+            weapon,
+            totalStatus
+        );
+
+        var skill = SkillControl.getPossessionCustomSkill(
+            passive,
+            "statcompare"
+        );
+
+        if (skill !== null && checkCondition(passive, active, skill)) {
+
+            cav += skill.custom.criticalAvoidBonus || 0;
+        }
+
+        return cav;
+    };
+
+
+    // =========================
+    // CONDITION CHECK
+    // =========================
+
+    function checkCondition(user, target, skill) {
+
+        var userStat = skill.custom.userStat;
+        var targetStat = skill.custom.targetStat;
+
+        var operator = skill.custom.operator;
+        var value = skill.custom.value;
+
+        var userValue = getStat(user, userStat);
+        var targetValue = getStat(target, targetStat);
+
+        if (operator === "greater") {
+            return (userValue >= targetValue + value);
+        }
+        else if (operator === "less") {
+            return (userValue <= targetValue - value);
+        }
+
+        return false;
+    }
 
 
     // =========================
@@ -214,13 +339,13 @@ If omitted, they automatically default to 0.
             case "wlv":
                 return RealBonus.getWlv(unit);
 
-		    case "mhp":
+            case "mhp":
                 return RealBonus.getMhp(unit);
 
-			case "lvl":
+            case "lvl":
                 return unit.getLv();
 
-			case "bld":
+            case "bld":
                 return RealBonus.getBld(unit);
         }
 
